@@ -10,7 +10,7 @@ use anchor_spl::{
     }, 
 }; 
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("knWFUzBZJVp5yxkqA9w9UH3dv3qHm2LiVzV67rcHGQd");
 
 #[program]
 pub mod batch_transfer {
@@ -79,7 +79,7 @@ pub struct DepositToken<'info> {
         associated_token::mint = mint,
         associated_token::authority = authority,
     )]
-    pub from : Account<'info, TokenAccount>,
+    pub from : Box<Account<'info, TokenAccount>>,
 
     #[account(
         init,
@@ -88,7 +88,7 @@ pub struct DepositToken<'info> {
         bump,
         space = 8 + 32
     )]
-    pub ledger: Account<'info, RegistrationLedger>,
+    pub ledger: Box<Account<'info, RegistrationLedger>>,
     
     #[account(
         init,
@@ -96,9 +96,9 @@ pub struct DepositToken<'info> {
         associated_token::mint = mint,
         associated_token::authority = ledger,
     )]
-    pub vault: Account<'info, TokenAccount>,
+    pub vault: Box<Account<'info, TokenAccount>>,
     
-    pub mint: Account<'info, Mint>,
+    pub mint: Box<Account<'info, Mint>>,
 
     pub token_program: Program<'info, Token>,
     
@@ -122,15 +122,16 @@ pub struct SplTransfer<'info> {
         seeds = [b"Ledger", authority.key().as_ref()],
         bump,
     )]
-    pub ledger: Account<'info, RegistrationLedger>,
+    pub ledger: Box<Account<'info, RegistrationLedger>>,
 
     #[account(
         mut,
         associated_token::mint = mint,
         associated_token::authority = ledger,
     )]
-    pub vault: Account<'info, TokenAccount>,
+    pub vault: Box<Account<'info, TokenAccount>>,
     
+    /// CHECK: receiver's account
     pub to_owner: AccountInfo<'info>,
 
     #[account(
@@ -139,9 +140,9 @@ pub struct SplTransfer<'info> {
         associated_token::mint = mint,
         associated_token::authority = to_owner,
     )]
-    pub to: Account<'info, TokenAccount>,
+    pub to: Box<Account<'info, TokenAccount>>,
 
-    pub mint: Account<'info, Mint>,
+    pub mint: Box<Account<'info, Mint>>,
 
     pub token_program: Program<'info, Token>,
 
