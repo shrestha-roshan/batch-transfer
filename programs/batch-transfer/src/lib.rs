@@ -41,7 +41,7 @@ pub mod batch_transfer {
         let token_program = ctx.accounts.token_program.to_account_info();
         let from = ctx.accounts.vault.to_account_info();
         let to = ctx.accounts.to.to_account_info();
-        let authority = ctx.accounts.authority.to_account_info();
+        let ledger = ctx.accounts.ledger.to_account_info();
         
         let vault_amount = ctx.accounts.vault.amount;
         assert!(vault_amount > amount, "Vault amount is less than transfer amount");
@@ -49,7 +49,7 @@ pub mod batch_transfer {
         let accounts = TokenTransfer {
             from,
             to,
-            authority 
+            authority: ledger 
         };
 
         let authority_key = ctx.accounts.authority.key();
@@ -57,7 +57,7 @@ pub mod batch_transfer {
             .get("ledger")
             .unwrap_or_else(|| panic!("Bump is missing."))
             .to_be_bytes();
-        let signer_seeds: &[&[&[u8]]] = &[&[b"Ledger", authority_key.as_ref(), bump.as_ref()]]];
+        let signer_seeds: &[&[&[u8]]] = &[&[b"Ledger", authority_key.as_ref(), bump.as_ref()]];
 
         let ctx = CpiContext::new_with_signer(
             token_program,

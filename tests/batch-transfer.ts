@@ -87,7 +87,7 @@ describe("batch-transfer", () => {
     const to = anchor.utils.token.associatedAddress({mint, owner: toOwner})
     const amount = new BN("1").mul(new BN(anchor.web3.LAMPORTS_PER_SOL));
     
-    const ixn = await program.methods
+    const ix = await program.methods
       .splTransfer(amount)
       .accounts({
         associatedTokenProgram,
@@ -103,9 +103,9 @@ describe("batch-transfer", () => {
 
       const tx = new anchor.web3.Transaction();
       
-      let ixnCount = 10
-      for (let i = 0; i < ixnCount; i++) {
-        tx.add(ixn);
+      let MAX_IX_COUNT = 28
+      for (let i = 0; i < MAX_IX_COUNT; i++) {
+        tx.add(ix);
       }
 
       const {blockhash, lastValidBlockHeight} = await connection.getLatestBlockhash();
@@ -114,16 +114,18 @@ describe("batch-transfer", () => {
       tx.lastValidBlockHeight = lastValidBlockHeight;
       
       const signed = await wallet.signTransaction(tx);
-      console.log(tx);
+      console.log("ixn count", tx.instructions.length);
 
       try {
         const signature = await connection.sendRawTransaction(signed.serialize());
         await connection.confirmTransaction({blockhash, lastValidBlockHeight, signature});
+
+        console.log("signature", signature);
       } catch (e) {
         if (e instanceof anchor.web3.SendTransactionError) {
-          console.log(e);
           console.log(e.logs);
         }
+        throw e;
       }
   })
 
