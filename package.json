@@ -1,7 +1,8 @@
 {
     "scripts": {
         "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-        "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+        "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+        "test:single": "mocha --bail --timeout=300000 --check-leaks -r ts-node/register"
     },
     "dependencies": {
         "@coral-xyz/anchor": "^0.27.0",
