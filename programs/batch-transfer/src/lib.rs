@@ -10,7 +10,7 @@ use anchor_spl::{
     }, 
 }; 
 
-declare_id!("knWFUzBZJVp5yxkqA9w9UH3dv3qHm2LiVzV67rcHGQd");
+declare_id!("DwZruo6t3BW4DUtALe2i2E6ewA8b5mH1Lk2TWeyV8ymo");
 
 #[program]
 pub mod batch_transfer {
@@ -57,7 +57,7 @@ pub mod batch_transfer {
             .get("ledger")
             .unwrap_or_else(|| panic!("Bump is missing."))
             .to_be_bytes();
-        let signer_seeds: &[&[&[u8]]] = &[&[b"Ledger", authority_key.as_ref(), bump.as_ref()]];
+        let signer_seeds: &[&[&[u8]]] = &[&[b"Ledger", authority_key.as_ref(), bump.as_ref()]]];
 
         let ctx = CpiContext::new_with_signer(
             token_program,
@@ -82,7 +82,7 @@ pub struct DepositToken<'info> {
     pub from : Box<Account<'info, TokenAccount>>,
 
     #[account(
-        init,
+        init_if_needed,
         payer = authority,
         seeds = [b"Ledger", authority.key().as_ref()],
         bump,
@@ -91,7 +91,7 @@ pub struct DepositToken<'info> {
     pub ledger: Box<Account<'info, RegistrationLedger>>,
     
     #[account(
-        init,
+        init_if_needed,
         payer = authority,
         associated_token::mint = mint,
         associated_token::authority = ledger,

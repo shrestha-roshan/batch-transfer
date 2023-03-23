@@ -2,10 +2,10 @@
 seeds = false
 skip-lint = false
 [programs.localnet]
-batch_transfer = "knWFUzBZJVp5yxkqA9w9UH3dv3qHm2LiVzV67rcHGQd"
+batch_transfer = "DwZruo6t3BW4DUtALe2i2E6ewA8b5mH1Lk2TWeyV8ymo"
 
 [programs.devnet]
-batch_transfer = "knWFUzBZJVp5yxkqA9w9UH3dv3qHm2LiVzV67rcHGQd"
+batch_transfer = "DwZruo6t3BW4DUtALe2i2E6ewA8b5mH1Lk2TWeyV8ymo"
 
 [registry]
 url = "https://api.apr.dev"
