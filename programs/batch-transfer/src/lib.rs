@@ -26,6 +26,15 @@ pub mod batch_transfer {
         }
         Ok(())
     }
+
+    pub fn sol_transfer(ctx: Context<SolTransfer>, amount: u64) -> Result<()> {
+        msg!("Transfer solana token");
+        let from = &ctx.accounts.from;
+        let receiver = &ctx.accounts.to;
+        let ix = transfer(&from.key, &receiver.key, amount);
+        invoke(&ix, &[from.clone(), receiver.clone()])?;
+        Ok(())
+    }
 }
 #[derive(Clone, Accounts)]
 
@@ -33,6 +42,18 @@ pub struct BatchSolTransfer<'info> {
     #[account(signer)]
     /// CHECK:
     pub from: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
+}
+
+#[derive(Clone, Accounts)]
+pub struct SolTransfer<'info> {
+    #[account(signer)]
+    /// CHECK:
+    pub from: AccountInfo<'info>,
+    #[account(mut)]
+    /// CHECK:
+    pub to: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 }

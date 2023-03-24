@@ -22,6 +22,7 @@ describe("batch-transfer", async () => {
     const random_accounts: anchor.web3.PublicKey[] = [];
     const amounts: anchor.BN[] = [];
 
+    //max 20 accounts
     for (let i = 0; i < 20; i++) {
       random_accounts.push(anchor.web3.Keypair.generate().publicKey);
       amounts.push(new anchor.BN(100000000));
