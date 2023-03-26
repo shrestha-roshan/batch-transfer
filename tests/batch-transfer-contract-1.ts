@@ -1,6 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
   createAssociatedTokenAccount,
   createTransferCheckedInstruction,
   getAssociatedTokenAddressSync,
@@ -26,74 +27,74 @@ describe("batch-transfer", async () => {
   );
   const owner = anchor.web3.Keypair.fromSecretKey(Buffer.from(owner_buffer));
 
-  it("Bulk Transfer", async () => {
-    const owner_pda = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("batch-test"), owner.publicKey.toBuffer()],
-      program.programId
-    );
-    console.log("ownder-pda", owner_pda[0].toBase58());
-    try {
-      await program.methods
-        .initializeSol()
-        .accounts({
-          fromAuthority: owner.publicKey,
-          fromPda: owner_pda[0],
-          systemProgram: anchor.web3.SystemProgram.programId,
-        })
-        .signers([owner])
-        .rpc();
-    } catch (e) {
-      console.log(e);
-    }
+  // it("Bulk Transfer", async () => {
+  //   const owner_pda = anchor.web3.PublicKey.findProgramAddressSync(
+  //     [Buffer.from("batch-test"), owner.publicKey.toBuffer()],
+  //     program.programId
+  //   );
+  //   console.log("ownder-pda", owner_pda[0].toBase58());
+  //   try {
+  //     await program.methods
+  //       .initializeSol()
+  //       .accounts({
+  //         fromAuthority: owner.publicKey,
+  //         fromPda: owner_pda[0],
+  //         systemProgram: anchor.web3.SystemProgram.programId,
+  //       })
+  //       .signers([owner])
+  //       .rpc();
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
 
-    // generate 10 random accounts
-    const random_accounts: anchor.web3.PublicKey[] = [];
-    const amounts: anchor.BN[] = [];
+  //   // generate 10 random accounts
+  //   const random_accounts: anchor.web3.PublicKey[] = [];
+  //   const amounts: anchor.BN[] = [];
 
-    //max 20 accounts
-    for (let i = 0; i < 20; i++) {
-      random_accounts.push(anchor.web3.Keypair.generate().publicKey);
-      amounts.push(new anchor.BN(100000000));
-    }
-    //Array of accout metas
-    const accounts: anchor.web3.AccountMeta[] = [];
-    for (const account of random_accounts) {
-      accounts.push({
-        pubkey: account,
-        isSigner: false,
-        isWritable: true,
-      });
-    }
-    // request air drop for all accounts
-    for (const account of random_accounts) {
-      console.log("airdrop");
-      anchor.getProvider().connection.requestAirdrop(account, 1000);
-    }
+  //   //max 20 accounts
+  //   for (let i = 0; i < 20; i++) {
+  //     random_accounts.push(anchor.web3.Keypair.generate().publicKey);
+  //     amounts.push(new anchor.BN(100000000));
+  //   }
+  //   //Array of accout metas
+  //   const accounts: anchor.web3.AccountMeta[] = [];
+  //   for (const account of random_accounts) {
+  //     accounts.push({
+  //       pubkey: account,
+  //       isSigner: false,
+  //       isWritable: true,
+  //     });
+  //   }
+  //   // request air drop for all accounts
+  //   for (const account of random_accounts) {
+  //     console.log("airdrop");
+  //     anchor.getProvider().connection.requestAirdrop(account, 1000);
+  //   }
 
-    accounts.push({
-      pubkey: owner_pda[0],
-      isSigner: false,
-      isWritable: true,
-    });
+  //   accounts.push({
+  //     pubkey: owner_pda[0],
+  //     isSigner: false,
+  //     isWritable: true,
+  //   });
 
-    try {
-      // call the program
-      const sig = await program.methods
-        .batchSolTransfer(amounts)
-        .accounts({
-          from: owner_pda[0],
-          fromAuthority: owner.publicKey,
-          systemProgram: anchor.web3.SystemProgram.programId,
-          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        })
-        .signers([])
-        .remainingAccounts(accounts)
-        .rpc();
-      console.log(sig);
-    } catch (e) {
-      console.log(e);
-    }
-  });
+  //   try {
+  //     // call the program
+  //     const sig = await program.methods
+  //       .batchSolTransfer(amounts)
+  //       .accounts({
+  //         from: owner_pda[0],
+  //         fromAuthority: owner.publicKey,
+  //         systemProgram: anchor.web3.SystemProgram.programId,
+  //         rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+  //       })
+  //       .signers([])
+  //       .remainingAccounts(accounts)
+  //       .rpc();
+  //     console.log(sig);
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // });
 
   it("Bulk Transfer", async () => {
     const owner_pda = anchor.web3.PublicKey.findProgramAddressSync(
@@ -101,25 +102,30 @@ describe("batch-transfer", async () => {
       program.programId
     );
     console.log("owner-pda", owner_pda[0].toBase58());
-    // await program.methods
-    //   .initialize()
-    //   .accounts({
-    //     fromAuthority: owner.publicKey,
-    //     fromPda: ownder_pda[0],
-    //     systemProgram: anchor.web3.SystemProgram.programId,
-    //   })
-    //   .signers([owner])
-    //   .rpc();
 
     const owner_ata_pda = getAssociatedTokenAddressSync(
       mint,
       owner_pda[0],
       true
     );
+
+    await program.methods
+      .initialize()
+      .accounts({
+        fromAuthority: owner.publicKey,
+        fromPda: owner_pda[0],
+        fromPdaTokenAccount: owner_ata_pda,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        mint: mint,
+      })
+      .signers([owner])
+      .rpc();
+
     // generate 10 random accounts
     const random_accounts_ata: anchor.web3.PublicKey[] = [];
     const amounts: anchor.BN[] = [];
-    await createAssociatedTokenAccount(connection, owner, mint, owner_pda[0]);
 
     // max 19 accounts
     for (let i = 0; i < 19; i++) {

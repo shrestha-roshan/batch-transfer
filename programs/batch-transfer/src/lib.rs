@@ -1,6 +1,9 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::system_instruction::transfer;
-use anchor_spl::token::{Mint, Token, TokenAccount};
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token::{Mint, Token, TokenAccount},
+};
 use spl_token::instruction::transfer as spl_transfer;
 declare_id!("FddwD1WwcAN5XfR3bzD9jW1wHs4Bg1jz7YXTMicshzZp");
 
@@ -126,17 +129,27 @@ pub struct BatchTokenTransfer<'info> {
 #[derive(Clone, Accounts)]
 pub struct Initialize<'info> {
     #[account(
-        init,
+        init_if_needed,
         seeds = [BATCH_TOKEN, from_authority.key().as_ref()],
         bump,
         payer = from_authority,
         space = 8
     )]
     pub from_pda: Box<Account<'info, BatchPda>>,
+    #[account(
+        init_if_needed,
+        payer = from_authority,
+        associated_token::mint = mint,
+        associated_token::authority = from_pda,
+    )]
+    pub from_pda_token_account: Account<'info, TokenAccount>,
     #[account(signer, mut)]
     ///CHECK::
     pub from_authority: AccountInfo<'info>,
+    pub mint: Box<Account<'info, Mint>>,
     pub system_program: Program<'info, System>,
+    pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
 }
 
 #[derive(Clone, Accounts)]
