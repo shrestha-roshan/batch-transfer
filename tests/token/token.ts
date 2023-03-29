@@ -86,8 +86,9 @@ describe("batch-transfer", async () => {
     const random_accounts_ata: anchor.web3.PublicKey[] = [];
     const amounts: anchor.BN[] = [];
 
-    // max 19 accounts
-    for (let i = 0; i < 19; i++) {
+    // max 19 accounts - without transfer_checked
+    // max 15 accounts - with transfer_checked
+    for (let i = 0; i < 15; i++) {
       let account = anchor.web3.Keypair.generate();
       let ata = await createAssociatedTokenAccount(
         connection,
@@ -122,6 +123,11 @@ describe("batch-transfer", async () => {
       },
       {
         pubkey: TOKEN_PROGRAM_ID,
+        isSigner: false,
+        isWritable: false,
+      },
+      {
+        pubkey: mint,
         isSigner: false,
         isWritable: false,
       }

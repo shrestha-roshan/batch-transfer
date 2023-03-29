@@ -2,9 +2,12 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::system_instruction::transfer;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::{transfer as token_transfer, Mint, Token, TokenAccount, Transfer as TokenTransfer},
+    token::{
+        transfer_checked as token_transfer, Mint, Token, TokenAccount,
+        TransferChecked as TokenTransfer,
+    },
 };
-use spl_token::instruction::transfer as spl_transfer;
+use spl_token::instruction::transfer_checked as spl_transfer;
 declare_id!("FddwD1WwcAN5XfR3bzD9jW1wHs4Bg1jz7YXTMicshzZp");
 
 // seeds
@@ -33,23 +36,23 @@ pub mod batch_transfer {
         let from = ctx.accounts.from.to_account_info();
         let to = ctx.accounts.batch_vault_token_account.to_account_info();
         let authority = ctx.accounts.authority.to_account_info();
+        let mint = &ctx.accounts.mint;
 
         let accounts = TokenTransfer {
             from,
             to,
             authority,
+            mint: mint.to_account_info(),
         };
 
         let ctx = CpiContext::new(token_program, accounts);
 
-        token_transfer(ctx, amount)?;
+        token_transfer(ctx, amount, mint.decimals)?;
         Ok(())
     }
 
     pub fn batch_sol_transfer(ctx: Context<BatchSolTransfer>, amount: Vec<u64>) -> Result<()> {
-        msg!("Batch transfer solana token");
         let from = &ctx.accounts.batch_vault;
-        msg!("from: {:?}", from.key);
         let receivers = ctx.remaining_accounts.clone();
 
         for (i, receiver) in receivers.iter().enumerate() {
@@ -83,20 +86,22 @@ pub mod batch_transfer {
     }
 
     pub fn batch_token_transfer(ctx: Context<BatchTokenTransfer>, amount: Vec<u64>) -> Result<()> {
-        msg!("Batch transfer token");
         let from = &ctx.accounts.batch_vault_token_account;
         let receivers = ctx.remaining_accounts;
+        let mint = &ctx.accounts.mint;
 
         let mut ixs = vec![];
         for (i, receiver) in receivers.iter().enumerate() {
-            if i < receivers.len() - 3 {
+            if i < receivers.len() - 4 {
                 let ix = spl_transfer(
                     &spl_token::id(),
                     &from.key(),
+                    &mint.key(),
                     &receiver.key,
                     &ctx.accounts.batch_vault.key(),
                     &[],
                     amount[i],
+                    mint.decimals,
                 )?;
                 ixs.push(ix);
             }

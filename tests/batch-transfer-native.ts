@@ -49,13 +49,28 @@ describe("batch-transfer-3", async () => {
       );
     }
 
-    const tx = new anchor.web3.Transaction();
-    tx.add(...instructions);
-    const sig = await anchor.web3.sendAndConfirmTransaction(
-      anchor.getProvider().connection,
-      tx,
-      [owner]
-    );
+    const messaage = new anchor.web3.TransactionMessage({
+      payerKey: owner.publicKey,
+      recentBlockhash: await anchor
+        .getProvider()
+        .connection.getLatestBlockhash()
+        .then((x) => x.blockhash),
+      instructions,
+    }).compileToV0Message();
+
+    const transaction = new anchor.web3.VersionedTransaction(messaage);
+    transaction.sign([owner]);
+    const sig = await anchor
+      .getProvider()
+      .connection.sendTransaction(transaction);
+
+    // const tx = new anchor.web3.Transaction();
+    // tx.add(...instructions);
+    // const sig = await anchor.web3.sendAndConfirmTransaction(
+    //   anchor.getProvider().connection,
+    //   transaction,
+    //   [owner]
+    // );
     console.log("sig-sol -> ", sig);
   });
 });

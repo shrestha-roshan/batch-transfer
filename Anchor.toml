@@ -1,7 +1,11 @@
 [features]
 seeds = false
 skip-lint = false
+
 [programs.localnet]
+batch_transfer = "FddwD1WwcAN5XfR3bzD9jW1wHs4Bg1jz7YXTMicshzZp"
+
+[programs.devnet]
 batch_transfer = "FddwD1WwcAN5XfR3bzD9jW1wHs4Bg1jz7YXTMicshzZp"
 
 [registry]
@@ -12,9 +16,12 @@ cluster = "localnet"
 wallet = "/Users/chou/.config/solana/id.json"
 
 [scripts]
-test-contract-1 = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/batch-transfer-contract-1.ts"
-test-contract-2 = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/batch-transfer-contract-1.ts"
 test-native = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/native/native.ts" 
-test-spl = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/token/token.ts" 
+test-spl = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/token/token.ts"  
+test-native-direct = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/batch-transfer-native.ts"
+test-spl-direct = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/batch-transfer-spl.ts"  
+test-create-ata = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/token/ata-create.ts"  
+
+
 
 
